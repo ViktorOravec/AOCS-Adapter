@@ -1,0 +1,18 @@
+{
+    "@context": [
+    "https://www.w3.org/2019/wot/td/v1"
+    ],
+    "security": ["nosec_sc"],
+    "securityDefinitions": {
+    "nosec_sc": {
+        "scheme": "nosec"
+    }
+    },
+    "@type": "adp:MonitoringSensor",
+    "type": "Device",
+    "title": "title",
+    "domain": "Energy",
+    "adapterId": "adapterId",
+    "description": "description",
+    "properties": {}
+}

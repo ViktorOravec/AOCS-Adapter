@@ -1,0 +1,8 @@
+services:
+  backend:
+    build: .
+    ports:
+      - 7001:7001
+    volumes:
+      - .env:/code/.env:rw
+      - ./data.json:/code/data.json
