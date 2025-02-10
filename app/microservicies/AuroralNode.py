@@ -72,6 +72,7 @@ class AuroralNode:
             path = "api/registration"
             response = requests.put(f"{self.host}/{path}", auth=(auroral_node_username, auroral_node_password), json=td)
             if response.status_code != 200:
+                # logger.error(f"TD: {td}")
                 logger.error(f"Update response: {response.text}")
                 raise Exception(f"Failed to update in node: {response.text}")                
             else:

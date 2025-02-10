@@ -34,7 +34,7 @@ async def get_property(request: Request, adapterId: str = "", pid: str = "", sta
     try:
         # start time for measuring how long the function takes
         starttime = time.time()
-        logger.debug(f"Getting property {pid} for adapter {adapterId} from {startTimestamp} to {stopTimestamp}")
+        logger.info(f"Getting property {pid} for adapter {adapterId} from {startTimestamp} to {stopTimestamp}")
         # call influxdb to get the value of the property
         if pid == "getAll":
             # we have adapterId -> we need to find object id and all monitored properties
@@ -77,6 +77,7 @@ async def get_property(request: Request, adapterId: str = "", pid: str = "", sta
             data = influxconnector.getData(pid, startTimestamp, stopTimestamp)
             endtime = time.time()
             logger.info(f"Getting property {pid} for adapter {adapterId} took {endtime-starttime} seconds")
+            return data
     except HTTPException as e:
         raise
     except Exception as e:

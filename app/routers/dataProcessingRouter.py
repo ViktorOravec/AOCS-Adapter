@@ -110,7 +110,7 @@ async def post_csv(request: Request, credentials: Annotated[HTTPBasicCredentials
             fileStr = file.decode("utf-8")
         except UnicodeDecodeError:
             # try Windows-1252
-            fileStr = file.decode("Windows-1252")
+            fileStr = file.decode("Windows-1250")
         file_stream = io.BytesIO(fileStr.encode("utf-8"))
         # parse csv
         csv_reader = csv.reader(io.StringIO(fileStr))
@@ -125,5 +125,10 @@ async def post_csv(request: Request, credentials: Annotated[HTTPBasicCredentials
     except HTTPException as e:
         raise e
     except Exception as e:
+        try:
+            # push to error bucket
+            s3connector.push_to_storage_error(io.BytesIO(file), file_name)
+        except Exception as e:
+            logger.error(f"Error pushing file to error bucket: {e}")
         print(f"Error processing CSV file: {e}")
         raise HTTPException(status_code=400, detail="Invalid file format or other issues.")

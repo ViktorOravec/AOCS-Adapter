@@ -47,12 +47,13 @@ def dataProcessing():
                 meter_code=m['KOD_MERACA']
                 value=float(m['POCITADLO'])
                 meter_name= m['NAZOV_MERACA']
+                uid=m['UID']
                 energia=m['ENERGIA']
                 timestamp_csv=m['PM_TIME']
                 local_timezone = pytz.timezone("Europe/Bratislava")  
                 timestamp_local = datetime.strptime(timestamp_csv, "%d.%m.%Y %H:%M")
                 timestamp_utc = local_timezone.localize(timestamp_local).astimezone(pytz.utc)
-                id = object_code + "_" + meter_code
+                id = object_code + "_" + meter_code + "_" + uid
 
                 # check if id is enabled
                 d = enabled_data_points.get(id)

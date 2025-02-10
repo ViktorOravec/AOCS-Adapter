@@ -14,8 +14,11 @@ load_dotenv()
 aws_access_key_id: Optional[str] = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key: Optional[str] = os.getenv('AWS_SECRET_ACCESS_KEY')
 bucket_name: Optional[str] = os.getenv('BUCKET_NAME')
+error_bucket_name = 'error-bucket'
 endpoint_url: Optional[str] = os.getenv('ENDPOINT_URL')
 processed_tag: str = 'processedToInflux'
+# 
+process_everything: Optional[bool] = os.getenv('PROCESS_EVERYTHING', 'False').lower() == 'true'
 
 # Singleton class to connect to an object storage service
 class ObjectStorageConnector:
@@ -69,6 +72,12 @@ class ObjectStorageConnector:
         logger.debug("Listing unprocessed files")
         try:
             listResponse = self.s3_client.list_objects_v2(Bucket=self.bucket_name)
+            if(process_everything):
+                unprocessed_files = []
+                for obj in listResponse.get('Contents', []):
+                    filename = obj.get('Key')
+                    unprocessed_files.append(filename)
+                return unprocessed_files
             unprocessed_files = []
             for obj in listResponse.get('Contents', []):
                 filename = obj.get('Key')
@@ -110,7 +119,18 @@ class ObjectStorageConnector:
             logger.error("Credentials not available")
         except Exception as e:
             logger.error(f"Error marking file as processed: {e}")
-    
+    def push_to_storage_error(self, file_data: io.BytesIO, file_name: str) -> None:
+        logger.debug("Pushing to storage(error)")
+        try:
+            self.s3_client.upload_fileobj(file_data, error_bucket_name, str(file_name))
+            logger.info(f"File {file_name} uploaded to {self.bucket_name}/{file_name}")
+        except FileNotFoundError:
+            logger.error(f"The file {file_name} was not found")
+        except NoCredentialsError:
+            logger.error("Credentials not available")
+        except PartialCredentialsError:
+            logger.error("Incomplete credentials provided")
+
     def push_to_storage(self, file_data: io.BytesIO, file_name: str) -> None:
         logger.debug("Pushing to storage")
         try:
